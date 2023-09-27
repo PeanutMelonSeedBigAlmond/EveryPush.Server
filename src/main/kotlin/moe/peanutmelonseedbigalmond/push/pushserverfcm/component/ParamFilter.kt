@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse
 class ParamFilter : OncePerRequestFilter() {
     companion object {
         @JvmStatic
-        private val excludePath = arrayOf("/ping", "/user/login","/message/push")
+        private val excludePath = arrayOf("/ping", "/user/login", "/message/push")
     }
 
     @Autowired
@@ -35,7 +35,11 @@ class ParamFilter : OncePerRequestFilter() {
             if (token.isNullOrBlank()) {
                 filterChain.doFilter(request, response)
             } else {
-                val uid = loginTokenRepository.getLoginTokenInfoByToken(token)!!.belongsTo
+                val uid =
+                    loginTokenRepository.getLoginTokenInfoByToken(token)?.belongsTo ?: return filterChain.doFilter(
+                        request,
+                        response
+                    )
                 val wrapper = RequestParameterWrapper(request)
                 wrapper.removeParameter("uid")
                 wrapper.addParameters(mapOf("uid" to uid))
