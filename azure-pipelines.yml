@@ -12,6 +12,8 @@ trigger:
       - readme.md
       - .gitignore
       - api.md
+      - Dockerfile
+      - .dockerignore
 
 pool:
   vmImage: ubuntu-latest

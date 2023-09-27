@@ -1,0 +1,36 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - '*'
+  paths:
+    exclude:
+      - readme.md
+      - .gitignore
+      - api.md
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: |
+    export commitHash=$(Build.SourceVersion)
+    echo ${commitHash:0:7}
+    echo "##vso[task.setvariable variable=baseImageTag;isoutput=true]${commitHash:0:7}"
+  name: setBaseImageTag
+  displayName: Set base image tag
+- task: Docker@2
+  displayName: Build and push docker imagge
+  inputs:
+    containerRegistry: 'ghcr'
+    repository: 'PeanutMelonSeedBigAlmond/PushServer'
+    command: 'buildAndPush'
+    Dockerfile: 'Dockerfile'
+    buildContext: 
+    tags: |
+      ci-$(setBaseImageTag.baseImageTag)-$(Build.BuildId)
+      ci-latest
