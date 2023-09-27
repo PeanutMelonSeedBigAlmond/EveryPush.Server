@@ -22,4 +22,7 @@ class MessageBean {
 
     @Column(nullable = false)
     var owner = 0L
+
+    @Column(nullable = false)
+    var deleted = false
 }

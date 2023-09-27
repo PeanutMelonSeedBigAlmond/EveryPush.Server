@@ -36,6 +36,8 @@ class MessageController {
     @Autowired
     private lateinit var messageService: PushMessageService
 
+    private val logger = Logger.getLogger(this::class.java.name)
+
     /**
      * 推送消息
      * @param pushToken String
@@ -74,10 +76,11 @@ class MessageController {
             message.type = type
             message.pushTime = System.currentTimeMillis()
             message.owner = tokenInfo.owner
+            message.deleted = false
 
             val savedMessage = messageRepository.save(message)
 
-            Logger.getLogger(this::class.java.name).info("推送消息成功，id=${savedMessage.messageId}")
+            logger.info("${tokenInfo.owner} 推送消息成功，id=${savedMessage.messageId}")
             return ResponseEntity(
                 ResponseWrapper(
                     data = PushMessageResponse(
@@ -89,7 +92,7 @@ class MessageController {
                 HttpStatus.OK
             )
         } else {
-            Logger.getLogger(this::class.java.name).warning("没有已经注册的设备")
+            logger.warning("${tokenInfo.owner} 没有已经注册的设备")
             return ResponseEntity(
                 ResponseWrapper(data = PushMessageResponse(0, 0, System.currentTimeMillis())),
                 HttpStatus.OK
@@ -98,13 +101,13 @@ class MessageController {
     }
 
     /**
-     * 获取所有消息记录
+     * 获取所有未被删除消息记录
      * @param uid Long
      * @return ResponseEntity<ResponseWrapper<List<FetchMessageResponse>>>
      */
     @RequestMapping("/all")
     suspend fun fetchAllMessages(@NotNull uid: Long): ResponseEntity<ResponseWrapper<List<FetchMessageResponse>>> {
-        val messages = messageRepository.getMessageBeansByOwner(uid).map {
+        val messages = messageRepository.findByOwnerAndDeleted(owner = uid, deleted = false).map {
             return@map FetchMessageResponse(it.messageId, it.text, it.title, it.type, it.pushTime)
         }
         return ResponseEntity(ResponseWrapper(data = messages), HttpStatus.OK)
@@ -118,27 +121,17 @@ class MessageController {
      */
     @RequestMapping("/remove")
     suspend fun removeMessage(@NotNull uid: Long, @NotNull id: Long): ResponseEntity<ResponseWrapper<Unit>> {
-        val message = messageRepository.getMessageBeanByMessageId(id)
-        return if (message == null) {
-            ResponseEntity(
-                ResponseWrapper(message = "指定的消息不存在"),
-                HttpStatus.BAD_REQUEST
-            )
-        } else if (message.owner != uid) {
-            ResponseEntity(
-                ResponseWrapper(message = "非法操作"),
-                HttpStatus.FORBIDDEN
-            )
-        } else {
-            messageRepository.delete(message)
-            return ResponseEntity(ResponseWrapper(data = Unit), HttpStatus.OK)
-        }
+        val messageCount =
+            messageRepository.updateDeletedByOwnerAndMessageId(owner = uid, messageId = id, deleted = true)
+
+        logger.info("用户 $uid 删除了 $messageCount 条消息")
+        return ResponseEntity(ResponseWrapper(data = Unit), HttpStatus.OK)
     }
 
     @RequestMapping("/clear")
     suspend fun clearMessage(@NotNull uid: Long): ResponseEntity<ResponseWrapper<Unit>> {
-        messageRepository.deleteMessageBeansByOwner(uid)
-
+        val deleteCount = messageRepository.updateDeletedByOwner(deleted = true, owner = uid)
+        logger.info("$uid 删除了 $deleteCount 消息记录")
         return ResponseEntity(ResponseWrapper(data = Unit), HttpStatus.OK)
     }
 }
