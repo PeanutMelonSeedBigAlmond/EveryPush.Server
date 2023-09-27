@@ -5,7 +5,7 @@ import javax.persistence.*
 @Entity
 class UserInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var uid = 0L
 
     @Column(nullable = false)

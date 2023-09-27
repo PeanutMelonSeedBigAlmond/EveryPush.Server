@@ -5,13 +5,13 @@ import javax.persistence.*
 @Entity
 class PushTokenInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id = 0L
 
     @Column(nullable = false)
     lateinit var name: String
 
-    @Column(nullable = false, unique = false)
+    @Column(nullable = false, unique = true)
     lateinit var pushToken: String
 
     @Column(nullable = false)

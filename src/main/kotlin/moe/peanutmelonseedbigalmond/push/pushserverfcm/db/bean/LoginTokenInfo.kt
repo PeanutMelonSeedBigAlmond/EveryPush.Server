@@ -2,11 +2,7 @@ package moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean
 
 import java.time.Duration
 import java.util.*
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
+import javax.persistence.*
 
 /**
  * 登录 token
@@ -14,7 +10,7 @@ import javax.persistence.Id
 @Entity
 class LoginTokenInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id=0L
 
     @Column(nullable = false)

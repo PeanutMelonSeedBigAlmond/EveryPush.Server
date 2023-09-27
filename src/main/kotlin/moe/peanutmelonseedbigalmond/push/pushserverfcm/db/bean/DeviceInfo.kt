@@ -5,7 +5,7 @@ import javax.persistence.*
 @Entity
 class DeviceInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id = 0L
 
     @Column(nullable = false, columnDefinition = "TEXT")
