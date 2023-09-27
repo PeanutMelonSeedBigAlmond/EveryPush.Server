@@ -30,11 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
 
-    implementation("com.h2database:h2:2.1.214")
-//    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
-//    implementation("com.github.gwenn:sqlite-dialect:0.1.2") {
-//        exclude("org.hibernate.orm","hibernate-core")
-//    }
+    implementation("mysql:mysql-connector-java:8.0.33")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.1-native-mt")
