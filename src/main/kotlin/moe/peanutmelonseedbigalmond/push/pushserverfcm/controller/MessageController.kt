@@ -1,14 +1,15 @@
 package moe.peanutmelonseedbigalmond.push.pushserverfcm.controller
 
 import kotlinx.coroutines.*
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.component.validator.annotation.ValueList
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.FetchMessageResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.PushMessageResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.ResponseWrapper
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.service.PushMessageService
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.MessageBean
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.DeviceRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.PushTokenRepository
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.util.fcm.FCMMessageUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -33,9 +34,6 @@ class MessageController {
     @Autowired
     private lateinit var messageRepository: MessageRepository
 
-    @Autowired
-    private lateinit var messageService: PushMessageService
-
     private val logger = Logger.getLogger(this::class.java.name)
 
     /**
@@ -51,7 +49,7 @@ class MessageController {
         @NotEmpty pushToken: String,
         @NotEmpty text: String,
         @RequestParam(defaultValue = "") title: String,
-        @RequestParam(defaultValue = "text") type: String
+        @RequestParam(defaultValue = "text") @ValueList(values = ["text", "image", "markdown"]) type: String
     ): ResponseEntity<ResponseWrapper<PushMessageResponse>> {
         val tokenInfo = pushTokenRepository.getPushTokenInfoByPushToken(pushToken) ?: return ResponseEntity(
             ResponseWrapper(
@@ -62,12 +60,11 @@ class MessageController {
         val fcmTokenList = deviceList.map { it.fcmToken }
 
         if (fcmTokenList.isNotEmpty()) {
-            val pushResult = messageService.pushMessage(
-                fcmTokenList, mapOf(
-                    "text" to text,
-                    "type" to type,
-                    "title" to title
-                )
+            val pushResult = FCMMessageUtil.sendNotification(
+                fcmTokens = fcmTokenList,
+                title = title,
+                text = text,
+                type = type
             )
 
             val message = MessageBean()
