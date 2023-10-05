@@ -6,9 +6,11 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.Fetch
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.PushMessageResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.ResponseWrapper
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.MessageBean
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.TopicInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.DeviceRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.PushTokenRepository
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.TopicRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.util.fcm.FCMMessageUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -34,6 +36,9 @@ class MessageController {
     @Autowired
     private lateinit var messageRepository: MessageRepository
 
+    @Autowired
+    private lateinit var topicRepository: TopicRepository
+
     private val logger = Logger.getLogger(this::class.java.name)
 
     /**
@@ -42,6 +47,7 @@ class MessageController {
      * @param text String
      * @param title String
      * @param type String
+     * @param topicId String
      * @return ResponseEntity<ResponseWrapper<PushMessageResponse>>
      */
     @RequestMapping("/push")
@@ -49,7 +55,8 @@ class MessageController {
         @NotEmpty pushToken: String,
         @NotEmpty text: String,
         @RequestParam(defaultValue = "") title: String,
-        @RequestParam(defaultValue = "text") @ValueList(values = ["text", "image", "markdown"]) type: String
+        @RequestParam(defaultValue = "text") @ValueList(values = ["text", "image", "markdown"]) type: String,
+        @RequestParam(value = "id", defaultValue = "") topicId: String,
     ): ResponseEntity<ResponseWrapper<PushMessageResponse>> {
         val tokenInfo = pushTokenRepository.getPushTokenInfoByPushToken(pushToken) ?: return ResponseEntity(
             ResponseWrapper(
@@ -59,12 +66,18 @@ class MessageController {
         val deviceList = deviceRepository.getDeviceInfosByOwner(tokenInfo.owner)
         val fcmTokenList = deviceList.map { it.fcmToken }
 
+        val topicExists = topicRepository.existsByPk(TopicInfo.TopicInfoPK(owner = tokenInfo.owner, topicId = topicId))
+        if (topicId != "" && !topicExists) {
+            logger.info("${tokenInfo.owner} 尝试推送到一个不存在的渠道 $topicId")
+        }
+
         if (fcmTokenList.isNotEmpty()) {
             val pushResult = FCMMessageUtil.sendNotification(
                 fcmTokens = fcmTokenList,
                 title = title,
                 text = text,
-                type = type
+                type = type,
+                topic = if (topicId != "" && !topicExists) "" else topicId
             )
 
             val message = MessageBean()
@@ -73,6 +86,7 @@ class MessageController {
             message.type = type
             message.pushTime = System.currentTimeMillis()
             message.owner = tokenInfo.owner
+            message.topicId = topicId
             message.deleted = false
 
             val savedMessage = messageRepository.save(message)
@@ -100,11 +114,19 @@ class MessageController {
     /**
      * 获取所有未被删除消息记录
      * @param uid Long
+     * @param topicId String 要查询哪个 topic 中的消息，如果为 null 则为所有消息，若为 空字符串 则为未分类的消息
      * @return ResponseEntity<ResponseWrapper<List<FetchMessageResponse>>>
      */
     @RequestMapping("/all")
-    suspend fun fetchAllMessages(@NotNull uid: Long): ResponseEntity<ResponseWrapper<List<FetchMessageResponse>>> {
-        val messages = messageRepository.findByOwnerAndDeleted(owner = uid, deleted = false).map {
+    suspend fun fetchAllMessages(
+        @NotNull uid: Long,
+        @RequestParam(value = "topic") topicId: String?,
+    ): ResponseEntity<ResponseWrapper<List<FetchMessageResponse>>> {
+        val messages = when (topicId) {
+            null -> messageRepository.findByOwnerAndDeleted(owner = uid, deleted = false)
+            "" -> messageRepository.findByOwnerAndDeletedAndTopicId(owner = uid, deleted = false, topicId = "")
+            else -> messageRepository.findByOwnerAndDeletedAndTopicId(owner = uid, deleted = false, topicId = topicId)
+        }.map {
             return@map FetchMessageResponse(it.messageId, it.text, it.title, it.type, it.pushTime)
         }
         return ResponseEntity(ResponseWrapper(data = messages), HttpStatus.OK)

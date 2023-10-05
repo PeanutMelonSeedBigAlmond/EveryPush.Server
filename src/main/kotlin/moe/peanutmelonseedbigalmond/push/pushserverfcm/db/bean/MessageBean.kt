@@ -24,5 +24,8 @@ class MessageBean {
     var owner = 0L
 
     @Column(nullable = false)
+    var topicId: String = ""
+
+    @Column(nullable = false)
     var deleted = false
 }
