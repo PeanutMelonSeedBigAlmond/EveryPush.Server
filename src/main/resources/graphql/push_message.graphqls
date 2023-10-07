@@ -1,0 +1,18 @@
+type PushMessage{
+    failedCount:Int!
+    messageId:ID!
+    pushedAt:Long!
+}
+
+input PushMessageParams{
+    pushToken:String!,
+    text:String!
+    title:String
+    type:String
+    topicId:String
+}
+
+
+extend type Mutation {
+    pushMessage(params:PushMessageParams!):PushMessage
+}

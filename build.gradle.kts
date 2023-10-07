@@ -27,6 +27,9 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
+    implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:7.0.1")
+    implementation("com.graphql-java:graphql-java:14.0")
+
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")
 

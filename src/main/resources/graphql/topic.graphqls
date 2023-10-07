@@ -1,0 +1,17 @@
+type Topic{
+    id:String!,
+    name:String!
+}
+
+type LatestMessage{
+    id:ID!,
+    type:String!
+    text:String!
+    title:String
+    sendAt:Long!,
+}
+
+extend type Mutation {
+    createTopic(id:ID!,name:String!,token:String!):Topic!
+    deleteTopic(id:ID!,token:String!):[Topic!]!
+}

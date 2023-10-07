@@ -1,0 +1,29 @@
+type Device{
+    id:ID!
+    deviceId:String!
+    type:String!
+    name:String!
+}
+
+input DeviceRegisterParams{
+    token:String!
+    deviceId:String!
+    type:String
+    name:String!
+}
+
+input DeviceRenameParams{
+    token:String!
+    id:ID!
+    newName:String!
+}
+
+extend type Mutation {
+    registerDevice(param:DeviceRegisterParams!):Device!
+    renameDevice(param:DeviceRenameParams!):Device!
+    removeDevice(token:String!,id:ID!):Device!
+}
+
+extend type Query {
+    listDevices(token:String!):[Device!]!
+}

@@ -1,0 +1,12 @@
+type User{
+    name:String!
+
+    devices:[Device!]!
+    topics:[Topic!]!
+    messages:[Message!]!
+    tokens:[PushToken!]!
+}
+
+extend type Mutation {
+    login(firebaseToken:String!):Token!
+}

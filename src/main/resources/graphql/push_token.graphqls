@@ -1,0 +1,23 @@
+type PushToken{
+    id:ID!
+    token:String!
+    name:String!
+    generatedAt:Long!
+}
+
+input PushTokenRenameParams{
+    token:String!
+    id:ID!
+    newName:String!
+}
+
+extend type Query {
+    listToken(token:String!):[PushToken!]!
+}
+
+extend type Mutation{
+    deleteToken(id:ID!,token:String!):PushToken!
+    createToken(token:String!):PushToken!
+    renameToken(params:PushTokenRenameParams!):PushToken!
+    reGenerateToken(id:ID!,token:String!):PushToken!
+}

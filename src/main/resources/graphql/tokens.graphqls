@@ -1,0 +1,12 @@
+scalar Long
+
+extend type Query{
+    token(loginToken:String):Token
+}
+
+type Token{
+    uid:ID!
+    token:String!
+    expiredAt:Long!
+    user:User
+}

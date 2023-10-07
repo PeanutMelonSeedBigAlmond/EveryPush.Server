@@ -12,7 +12,8 @@ interface MessageRepository : CrudRepository<MessageBean, Long> {
     @Query("update MessageBean m set m.deleted = ?1 where m.owner = ?2")
     fun updateDeletedByOwner(deleted: Boolean, owner: Long): Int
 
-    fun findByOwnerAndDeleted(owner: Long, deleted: Boolean): List<MessageBean>
+    @Query("select m from MessageBean m where m.owner=?1 and m.deleted=false")
+    fun findByOwnerAndNotDeleted(owner: Long): List<MessageBean>
 
     @Transactional
     @Modifying
@@ -21,4 +22,7 @@ interface MessageRepository : CrudRepository<MessageBean, Long> {
 
 
     fun findByOwnerAndDeletedAndTopicId(owner: Long, deleted: Boolean, topicId: String): List<MessageBean>
+
+    @Query("select m from MessageBean m where m.topicId=?1 and m.owner=?2 and m.deleted=false order by m.pushTime desc")
+    fun queryLatestMessageByTopicIdAndOwner(topicId: String, owner: Long): List<MessageBean?>
 }

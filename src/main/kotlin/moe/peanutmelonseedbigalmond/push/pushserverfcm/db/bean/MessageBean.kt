@@ -9,7 +9,7 @@ class MessageBean {
     var messageId = 0L
 
     @Column(nullable = false)
-    var title: String? = null
+    lateinit var title: String
 
     @Column(columnDefinition = "MEDIUMTEXT")
     lateinit var text: String
@@ -23,8 +23,8 @@ class MessageBean {
     @Column(nullable = false)
     var owner = 0L
 
-    @Column(nullable = false)
-    var topicId: String = ""
+    @Column(nullable = true)
+    var topicId: String? = null
 
     @Column(nullable = false)
     var deleted = false

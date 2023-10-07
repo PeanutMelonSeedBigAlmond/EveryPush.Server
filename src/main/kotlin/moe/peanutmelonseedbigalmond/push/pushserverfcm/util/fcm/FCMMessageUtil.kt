@@ -13,14 +13,14 @@ object FCMMessageUtil {
         text: String,
         title: String = "",
         type: String = "text",
-        topic: String = "",
+        topic: String? = null,
     ): List<SendMessageResult> {
         val message = MulticastMessage.builder()
             .setCommand(FCMMessageCommand.Notification)
             .setNotificationTitle(title)
             .setNotificationType(type.takeIf { it in allowedNotificationType } ?: "text")
             .setNotificationBody(text)
-            .setTopic(topic)
+            .apply { if (topic != null) setTopic(topic) }
             .addAllTokens(fcmTokens.take(500))
             .build()
         val response = FirebaseMessaging.getInstance().sendEachForMulticast(message)
