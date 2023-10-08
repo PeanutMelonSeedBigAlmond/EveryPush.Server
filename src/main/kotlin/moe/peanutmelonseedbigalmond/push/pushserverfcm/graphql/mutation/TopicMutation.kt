@@ -6,11 +6,12 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.LoginTokenW
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.TopicRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.GraphqlException
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.TopicQLBean
-import org.hibernate.validator.constraints.Length
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.springframework.validation.annotation.Validated
 import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 @Component
 @Validated
@@ -22,7 +23,10 @@ class TopicMutation : GraphQLMutationResolver {
     private lateinit var topicRepository: TopicRepository
 
     fun createTopic(
-        @Length(min = 5, max = 20) id: String,
+        @Size(min = 5, max = 30)
+        @Pattern(regexp = "^(?!EveryPush).+$", flags = [Pattern.Flag.CASE_INSENSITIVE])
+        @Pattern(regexp = "^[0-9a-zA-Z-_.]+$")
+        id: String,
         @NotBlank name: String,
         @NotBlank token: String
     ): TopicQLBean {
