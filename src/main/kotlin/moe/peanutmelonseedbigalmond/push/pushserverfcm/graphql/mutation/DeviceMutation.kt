@@ -25,13 +25,22 @@ class DeviceMutation : GraphQLMutationResolver {
 
     fun registerDevice(@Valid params: DeviceRegisterParams): DeviceQLBean {
         val uid = loginTokenWrapper.getLoginTokenInfoByToken(params.token).belongsTo
-        val deviceInfo = DeviceInfo()
-        deviceInfo.deviceType = params.type!!
-        deviceInfo.name = params.name
-        deviceInfo.owner = uid
-        deviceInfo.fcmToken = params.deviceId
-        val saved = deviceRepository.save(deviceInfo)
-        return saved.let {
+        val device = deviceRepository.getDeviceInfoByFcmToken(params.deviceId)
+        val savedDevice = if (device == null) {
+            val deviceInfo = DeviceInfo()
+            deviceInfo.deviceType = params.type!!
+            deviceInfo.name = params.name
+            deviceInfo.owner = uid
+            deviceInfo.fcmToken = params.deviceId
+            val saved = deviceRepository.save(deviceInfo)
+            saved
+        } else {
+            device.name = params.name
+            device.owner = uid
+            device.deviceType = params.type!!
+            device
+        }
+        return savedDevice.let {
             return@let DeviceQLBean(it.id, it.deviceType, it.fcmToken, it.name)
         }
     }
