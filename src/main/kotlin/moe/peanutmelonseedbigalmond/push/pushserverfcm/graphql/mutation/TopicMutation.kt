@@ -41,7 +41,7 @@ class TopicMutation : GraphQLMutationResolver {
         topic.name = name
         topic.pk = pk
         return topicRepository.save(topic).let {
-            return@let TopicQLBean(it.pk.topicId, it.name)
+            return@let TopicQLBean(it.pk.topicId, it.name, uid)
         }
     }
 
@@ -50,7 +50,7 @@ class TopicMutation : GraphQLMutationResolver {
         return topicRepository.deleteByPk(TopicInfo.TopicInfoPK(uid, id)).also {
             checkThrowGraphqlException(it.isNotEmpty()) { "Topic does not exists" }
         }.map {
-            return@map TopicQLBean(it.pk.topicId, it.name)
+            return@map TopicQLBean(it.pk.topicId, it.name, uid)
         }
     }
 

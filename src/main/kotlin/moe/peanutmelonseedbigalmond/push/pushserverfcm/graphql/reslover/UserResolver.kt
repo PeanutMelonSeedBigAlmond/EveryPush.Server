@@ -31,7 +31,7 @@ class UserResolver : GraphQLResolver<UserQLBean> {
 
     fun getTopics(bean: UserQLBean): List<TopicQLBean> {
         return topicRepository.findByPk_Owner(bean.uid).map {
-            return@map TopicQLBean(it.pk.topicId, it.name)
+            return@map TopicQLBean(it.pk.topicId, it.name, bean.uid)
         }
     }
 

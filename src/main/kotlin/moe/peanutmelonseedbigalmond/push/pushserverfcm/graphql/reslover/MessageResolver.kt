@@ -16,7 +16,7 @@ class MessageResolver : GraphQLResolver<MessagesQLBean> {
     fun getTopic(message: MessagesQLBean): TopicQLBean? {
         if (message.topicId == null) return null
         return topicRepository.findByPk(TopicInfo.TopicInfoPK(message.owner, message.topicId))?.let {
-            return@let TopicQLBean(it.pk.topicId, it.name)
+            return@let TopicQLBean(it.pk.topicId, it.name, message.owner)
         }
     }
 }

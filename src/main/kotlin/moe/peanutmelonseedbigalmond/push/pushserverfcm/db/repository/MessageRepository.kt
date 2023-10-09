@@ -24,5 +24,8 @@ interface MessageRepository : CrudRepository<MessageBean, Long> {
     fun findByOwnerAndDeletedAndTopicId(owner: Long, deleted: Boolean, topicId: String): List<MessageBean>
 
     @Query("select m from MessageBean m where m.topicId=?1 and m.owner=?2 and m.deleted=false order by m.pushTime desc")
-    fun queryLatestMessageByTopicIdAndOwner(topicId: String, owner: Long): List<MessageBean?>
+    fun queryMessagesByTopicIdAndOwnerAndPushTimeDesc(topicId: String, owner: Long): List<MessageBean>
+
+    @Query("select m from MessageBean m where m.topicId is null and m.owner=?1 and m.deleted=false order by m.pushTime desc")
+    fun queryMessagesByTopicIsNullIdAndOwnerAndPushTimeDesc(owner: Long): List<MessageBean>
 }

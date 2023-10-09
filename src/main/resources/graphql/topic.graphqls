@@ -1,14 +1,27 @@
 type Topic{
-    id:String!,
-    name:String!
+    id:String
+    name:String
+}
+
+extend type Topic{
+    latestMessage:LatestMessage
+}
+
+extend type Topic{
+    messages:[Message!]!
 }
 
 type LatestMessage{
     id:ID!,
     type:String!
     text:String!
-    title:String
+    title:String!
     sendAt:Long!,
+}
+
+extend type Query{
+    listTopic(token:String!):[Topic!]!
+    topicDetail(token:String!,topicId:String):Topic!
 }
 
 extend type Mutation {

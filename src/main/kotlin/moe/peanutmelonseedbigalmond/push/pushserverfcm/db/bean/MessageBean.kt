@@ -8,10 +8,10 @@ class MessageBean {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var messageId = 0L
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default ''")
     lateinit var title: String
 
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(columnDefinition = "MEDIUMTEXT", nullable = false)
     lateinit var text: String
 
     @Column(nullable = false)
@@ -23,7 +23,7 @@ class MessageBean {
     @Column(nullable = false)
     var owner = 0L
 
-    @Column(nullable = true)
+    @Column(nullable = true, columnDefinition = "varchar(255) default null")
     var topicId: String? = null
 
     @Column(nullable = false)
