@@ -54,16 +54,15 @@ class MessageController {
         val deviceList = deviceRepository.getDeviceInfosByOwner(tokenInfo.owner)
         val fcmTokenList = deviceList.map { it.fcmToken }
 
-        val tid = if (topicId != null && topicRepository.existsByPk(
-                TopicInfo.TopicInfoPK(
-                    owner = tokenInfo.owner,
-                    topicId = topicId
-                )
-            )
-        ) {
-            topicId
+        val topic = if (topicId != null) {
+            val t = topicRepository.findByPk(TopicInfo.TopicInfoPK(tokenInfo.owner, topicId))
+            if (t != null) {
+                t
+            } else {
+                logger.info("${tokenInfo.owner} 尝试推送到一个不存在的渠道 $topicId")
+                null
+            }
         } else {
-            logger.info("${tokenInfo.owner} 尝试推送到一个不存在的渠道 $topicId")
             null
         }
 
@@ -73,7 +72,8 @@ class MessageController {
                 title = title,
                 text = text,
                 type = type,
-                topic = tid
+                topic = topic?.pk?.topicId,
+                topicName = topic?.name
             )
 
             val message = MessageBean()
@@ -82,7 +82,7 @@ class MessageController {
             message.type = type
             message.pushTime = System.currentTimeMillis()
             message.owner = tokenInfo.owner
-            message.topicId = tid
+            message.topicId = topic?.pk?.topicId
             message.deleted = false
 
             val savedMessage = messageRepository.save(message)

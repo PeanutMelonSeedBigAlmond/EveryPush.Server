@@ -14,21 +14,55 @@ object FCMMessageUtil {
         title: String = "",
         type: String = "text",
         topic: String? = null,
+        topicName: String? = null
     ): List<SendMessageResult> {
+        val tokenList = fcmTokens.take(500)
         val message = MulticastMessage.builder()
             .setCommand(FCMMessageCommand.Notification)
             .setNotificationTitle(title)
             .setNotificationType(type.takeIf { it in allowedNotificationType } ?: "text")
             .setNotificationBody(text)
-            .apply { if (topic != null) setTopic(topic) }
-            .addAllTokens(fcmTokens.take(500))
+            .apply { setTopic(topic, topicName) }
+            .addAllTokens(tokenList)
             .build()
+        return doSendMulticastMessage(tokenList, message)
+    }
+
+    @JvmStatic
+    fun notifyTopicAdded(
+        fcmTokens: List<String>,
+        topic: String,
+        topicName: String
+    ): List<SendMessageResult> {
+        val tokenList = fcmTokens.take(500)
+        val message = MulticastMessage.builder()
+            .setCommand(FCMMessageCommand.AddTopic)
+            .setTopic(topic, topicName)
+            .addAllTokens(tokenList)
+            .build()
+        return doSendMulticastMessage(tokenList, message)
+    }
+
+    fun notifyTopicDeleted(
+        fcmTokens: List<String>,
+        topic: String,
+    ): List<SendMessageResult> {
+        val tokenList = fcmTokens.take(500)
+        val message = MulticastMessage.builder()
+            .setCommand(FCMMessageCommand.DeleteTopic)
+            .setTopic(topic, null)
+            .addAllTokens(tokenList)
+            .build()
+        return doSendMulticastMessage(tokenList, message)
+    }
+
+    @JvmStatic
+    fun doSendMulticastMessage(tokenList: List<String>, message: MulticastMessage): List<SendMessageResult> {
         val response = FirebaseMessaging.getInstance().sendEachForMulticast(message)
         val responseBody = response.responses
         val sendMessageResultList = responseBody.mapIndexed { index, element ->
-            return@mapIndexed SendMessageResult(fcmTokens[index], element.isSuccessful)
+            return@mapIndexed SendMessageResult(tokenList[index], element.isSuccessful)
         }
-
         return sendMessageResultList
     }
 
@@ -61,9 +95,14 @@ object FCMMessageUtil {
     }
 
     @JvmStatic
-    private fun MulticastMessage.Builder.setTopic(topicId: String): MulticastMessage.Builder {
+    private fun MulticastMessage.Builder.setTopic(topicId: String?, topicName: String?): MulticastMessage.Builder {
         return apply {
-            putData("topic", topicId)
+            if (topicId != null) {
+                putData("topic", topicId)
+            }
+            if (topicName != null) {
+                putData("topicName", topicName)
+            }
         }
     }
 }

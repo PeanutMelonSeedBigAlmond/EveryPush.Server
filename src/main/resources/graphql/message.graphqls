@@ -6,3 +6,7 @@ type Message{
     sendAt:Long!,
     topic:Topic
 }
+
+extend type Mutation {
+    deleteMessage(token:String!,id:ID!):Message!
+}

@@ -45,16 +45,15 @@ class PushMessageMutation : GraphQLMutationResolver {
         val deviceList = deviceRepository.getDeviceInfosByOwner(tokenInfo.owner)
         val fcmTokenList = deviceList.map { it.fcmToken }
 
-        val tid = if (params.topicId != null && topicRepository.existsByPk(
-                TopicInfo.TopicInfoPK(
-                    owner = tokenInfo.owner,
-                    topicId = params.topicId
-                )
-            )
-        ) {
-            params.topicId
+        val topic = if (params.topicId != null) {
+            val t = topicRepository.findByPk(TopicInfo.TopicInfoPK(tokenInfo.owner, params.topicId))
+            if (t != null) {
+                t
+            } else {
+                logger.info("${tokenInfo.owner} 尝试推送到一个不存在的渠道 ${params.topicId}")
+                null
+            }
         } else {
-            logger.info("${tokenInfo.owner} 尝试推送到一个不存在的渠道 ${params.topicId}")
             null
         }
 
@@ -65,7 +64,8 @@ class PushMessageMutation : GraphQLMutationResolver {
                 title = params.title!!,
                 text = params.text,
                 type = params.type!!,
-                topic = tid
+                topic = topic?.pk?.topicId,
+                topicName = topic?.name
             )
 
             val message = MessageBean()
@@ -74,7 +74,7 @@ class PushMessageMutation : GraphQLMutationResolver {
             message.type = params.type!!
             message.pushTime = System.currentTimeMillis()
             message.owner = tokenInfo.owner
-            message.topicId = tid
+            message.topicId = topic?.pk?.topicId
             message.deleted = false
 
             val savedMessage = messageRepository.save(message)
