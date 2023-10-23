@@ -45,16 +45,16 @@
       }
       ```
 - 响应示例
-- 成功
-  ```json5
-  {
-      "data": {
-         "failedCount": 0, // 推送失败的设备数量  
-         "messageId": 47, // 消息 id
-         "pushedAt": 1695693736219 // 消息推送时间
+    - 成功
+      ```json5
+      {
+          "data": {
+             "failedCount": 0, // 推送失败的设备数量  
+             "messageId": 47, // 消息 id
+             "pushedAt": 1695693736219 // 消息推送时间
+          }
       }
-  }
-  ```
+      ```
     - 失败
       ```json5
         {
