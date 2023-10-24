@@ -16,7 +16,7 @@ import javax.validation.constraints.NotBlank
 @Component
 @Validated
 class UserLoginMutation : GraphQLMutationResolver {
-    private val logger = Logger.getLogger(this::class.simpleName)
+    private val logger = Logger.getLogger(this::class.java.name)
 
     @Autowired
     private lateinit var userRepository: UserRepository
