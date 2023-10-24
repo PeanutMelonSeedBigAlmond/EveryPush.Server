@@ -22,6 +22,11 @@ interface MessageRepository : CrudRepository<MessageBean, Long> {
 
     @Transactional
     @Modifying
+    @Query("update MessageBean m set m.deleted=true where m.messageId=?1")
+    fun setMessageDeletedByMessageId(messageId: Long): Int
+
+    @Transactional
+    @Modifying
     @Query("update MessageBean m set m.topicId=null where m.topicId=?1 and m.owner=?2")
     fun moveTopicAllMessageToDefaultTopic(topicId: String, owner: Long): Int
 }

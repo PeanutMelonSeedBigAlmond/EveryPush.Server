@@ -26,7 +26,7 @@ class MessageMutation : GraphQLMutationResolver {
         val uid = loginTokenWrapper.getLoginTokenInfoByToken(token).belongsTo
         val message = messageRepository.findByMessageIdAndOwnerAndNotDeleted(uid, id)
             ?: throw GraphqlException("message does not exists")
-        messageRepository.delete(message)
+        messageRepository.setMessageDeletedByMessageId(message.messageId)
 
         return message.let {
             return@let MessagesQLBean(it.owner, it.messageId, it.type, it.text, it.title, it.pushTime, it.topicId)
