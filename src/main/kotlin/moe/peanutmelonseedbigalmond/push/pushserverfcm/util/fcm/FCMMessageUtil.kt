@@ -1,5 +1,6 @@
 package moe.peanutmelonseedbigalmond.push.pushserverfcm.util.fcm
 
+import com.google.firebase.messaging.AndroidConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.MulticastMessage
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.data.SendMessageResult
@@ -24,6 +25,7 @@ object FCMMessageUtil {
             .setNotificationBody(text)
             .apply { setTopic(topic, topicName) }
             .addAllTokens(tokenList)
+            .setAndroidConfig(AndroidConfig.builder().setPriority(AndroidConfig.Priority.HIGH).build())
             .build()
         return doSendMulticastMessage(tokenList, message)
     }
