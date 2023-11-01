@@ -10,3 +10,7 @@ type Message{
 extend type Mutation {
     deleteMessage(token:String!,id:ID!):Message!
 }
+
+extend type Query {
+    queryMessage(token:String!,id:ID!):Message!
+}
