@@ -65,7 +65,8 @@ class PushMessageMutation : GraphQLMutationResolver {
                 text = params.text,
                 type = params.type!!,
                 topic = topic?.pk?.topicId,
-                topicName = topic?.name
+                topicName = topic?.name,
+                originalUrl = params.originalUrl,
             )
 
             val message = MessageBean()
@@ -76,6 +77,7 @@ class PushMessageMutation : GraphQLMutationResolver {
             message.owner = tokenInfo.owner
             message.topicId = topic?.pk?.topicId
             message.deleted = false
+            message.originalUrl = params.originalUrl
 
             val savedMessage = messageRepository.save(message)
 

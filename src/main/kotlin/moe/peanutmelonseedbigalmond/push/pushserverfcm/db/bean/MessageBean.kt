@@ -28,4 +28,7 @@ class MessageBean {
 
     @Column(nullable = false)
     var deleted = false
+
+    @Column(nullable = true)
+    var originalUrl: String? = null
 }

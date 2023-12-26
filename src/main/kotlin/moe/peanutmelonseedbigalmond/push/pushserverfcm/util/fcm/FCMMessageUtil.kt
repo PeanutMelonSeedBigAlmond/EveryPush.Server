@@ -15,7 +15,8 @@ object FCMMessageUtil {
         title: String = "",
         type: String = "text",
         topic: String? = null,
-        topicName: String? = null
+        topicName: String? = null,
+        originalUrl: String? = null,
     ): List<SendMessageResult> {
         val tokenList = fcmTokens.take(500)
         val message = MulticastMessage.builder()
@@ -23,6 +24,7 @@ object FCMMessageUtil {
             .setNotificationTitle(title)
             .setNotificationType(type.takeIf { it in allowedNotificationType } ?: "text")
             .setNotificationBody(text)
+            .setOriginalUrl(originalUrl)
             .apply { setTopic(topic, topicName) }
             .addAllTokens(tokenList)
             .setAndroidConfig(AndroidConfig.builder().setPriority(AndroidConfig.Priority.HIGH).build())
@@ -86,6 +88,17 @@ object FCMMessageUtil {
     private fun MulticastMessage.Builder.setNotificationTitle(title: String): MulticastMessage.Builder {
         return apply {
             putData("title", title)
+        }
+    }
+
+    @JvmStatic
+    private fun MulticastMessage.Builder.setOriginalUrl(originalUrl: String?): MulticastMessage.Builder {
+        return if (originalUrl == null) {
+            this
+        } else {
+            apply {
+                putData("originUrl", originalUrl)
+            }
         }
     }
 

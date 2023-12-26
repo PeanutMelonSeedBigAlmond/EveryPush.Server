@@ -10,6 +10,7 @@ input PushMessageParams{
     title:String
     type:String
     topicId:String
+    originalUrl:String
 }
 
 

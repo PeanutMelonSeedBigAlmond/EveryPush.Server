@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.logging.Logger
 import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.Pattern
 
 @RestController
 @RequestMapping("/message")
@@ -47,6 +48,7 @@ class MessageController {
         @RequestParam(defaultValue = "") title: String,
         @RequestParam(defaultValue = "text") @ValueList(values = ["text", "image", "markdown"]) type: String,
         topicId: String?,
+        @Pattern(regexp = "https?://.*", message = "Malformed url") originalUrl: String?,
     ): ResponseEntity<RestApiResponseWrapper<PushMessageQLBean>> {
         val tokenInfo = pushTokenRepository.getPushTokenInfoByPushToken(pushToken) ?: return ResponseEntity(
             RestApiResponseWrapper(message = "Push token does not exists"), HttpStatus.BAD_REQUEST
@@ -73,7 +75,8 @@ class MessageController {
                 text = text,
                 type = type,
                 topic = topic?.pk?.topicId,
-                topicName = topic?.name
+                topicName = topic?.name,
+                originalUrl = originalUrl
             )
 
             val message = MessageBean()
@@ -84,6 +87,7 @@ class MessageController {
             message.owner = tokenInfo.owner
             message.topicId = topic?.pk?.topicId
             message.deleted = false
+            message.originalUrl = originalUrl
 
             val savedMessage = messageRepository.save(message)
 
