@@ -3,7 +3,7 @@ type User{
 
     devices:[Device!]!
     topics:[Topic!]!
-    messages:[Message!]!
+    messages(count:Int! = 20,after:String):MessageQueryResult!
     tokens:[PushToken!]!
 }
 

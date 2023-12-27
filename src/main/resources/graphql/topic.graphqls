@@ -5,10 +5,7 @@ type Topic{
 
 extend type Topic{
     latestMessage:LatestMessage
-}
-
-extend type Topic{
-    messages:[Message!]!
+    messages(count:Int = 20,after:String!):MessageQueryResult!
 }
 
 type LatestMessage{
