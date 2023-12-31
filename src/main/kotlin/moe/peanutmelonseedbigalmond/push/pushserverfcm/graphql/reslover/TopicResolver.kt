@@ -42,8 +42,8 @@ class TopicResolver : GraphQLResolver<TopicQLBean> {
         }
         return MessageQueryResult(
             QueryPageInfo(
-                messages.first().cursor,
-                messages.last().cursor,
+                messages.firstOrNull()?.cursor,
+                messages.firstOrNull()?.cursor,
                 offset != 0,
                 offset + messages.size != totalCount,
                 totalCount,

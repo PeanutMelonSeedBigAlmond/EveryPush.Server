@@ -29,11 +29,32 @@ class UserResolver : GraphQLResolver<UserQLBean> {
     private val base64Decoder by lazy { Base64.getDecoder() }
     private val base64Encoder by lazy { Base64.getEncoder() }
 
-    fun getDevices(bean: UserQLBean): List<DeviceQLBean> {
-        return deviceRepository.getDeviceInfosByOwner(bean.uid).map {
-            return@map DeviceQLBean(it.id, it.deviceType, it.fcmToken, it.name)
+    fun getDevices(bean: UserQLBean, @Min(1) count: Int, @GraphqlCursor after: String?): DeviceQueryResult {
+        val totalCount = deviceRepository.countByOwner(bean.uid)
+        val offset =
+            if (after.isNullOrBlank()) 0 else base64Decoder.decode(after).toString(Charsets.UTF_8).substring(6)
+                .toInt() + 1
+        val devices = deviceRepository.getDeviceInfosByOwner(
+            bean.uid,
+            OffsetBasedPageRequest(offset, count)
+        ).mapIndexed { index, item ->
+            val indexInDatabase = index + offset
+            val cursor = base64Encoder.encodeToString("cursor$indexInDatabase".toByteArray(Charsets.UTF_8))
+            DeviceItemWithCursor(item.id, item.deviceType, item.fcmToken, item.name, cursor)
         }
+        return DeviceQueryResult(
+            QueryPageInfo(
+                devices.firstOrNull()?.cursor,
+                devices.firstOrNull()?.cursor,
+                offset != 0,
+                offset + devices.size != totalCount,
+                totalCount,
+                devices.size
+            ),
+            devices
+        )
     }
+
 
     fun getTopics(bean: UserQLBean): List<TopicQLBean> {
         return topicRepository.findByPk_Owner(bean.uid).map {
@@ -56,8 +77,8 @@ class UserResolver : GraphQLResolver<UserQLBean> {
         }
         return MessageQueryResult(
             QueryPageInfo(
-                messages.first().cursor,
-                messages.last().cursor,
+                messages.firstOrNull()?.cursor,
+                messages.firstOrNull()?.cursor,
                 offset != 0,
                 offset + messages.size != totalCount,
                 totalCount,

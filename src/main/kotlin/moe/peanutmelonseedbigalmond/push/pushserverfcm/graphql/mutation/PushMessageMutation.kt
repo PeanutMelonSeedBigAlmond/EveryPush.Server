@@ -4,7 +4,7 @@ import graphql.kickstart.tools.GraphQLMutationResolver
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.MessageBean
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.TopicInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.DeviceRepository
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepository
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepositoryWrapper
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.PushTokenRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.TopicRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.GraphqlException
@@ -30,7 +30,7 @@ class PushMessageMutation : GraphQLMutationResolver {
     private lateinit var topicRepository: TopicRepository
 
     @Autowired
-    private lateinit var messageRepository: MessageRepository
+    private lateinit var messageRepositoryWrapper: MessageRepositoryWrapper
 
     private val logger = Logger.getLogger(this::class.java.name)
 
@@ -42,8 +42,7 @@ class PushMessageMutation : GraphQLMutationResolver {
     ): PushMessageQLBean {
         val tokenInfo = pushTokenRepository.getPushTokenInfoByPushToken(params.pushToken)
             ?: throw GraphqlException("push token does not exists")
-        val deviceList = deviceRepository.getDeviceInfosByOwner(tokenInfo.owner)
-        val fcmTokenList = deviceList.map { it.fcmToken }
+        val fcmTokenList = deviceRepository.getAllDevicesFcmTokenByOwner(tokenInfo.owner)
 
         val topic = if (params.topicId != null) {
             val t = topicRepository.findByPk(TopicInfo.TopicInfoPK(tokenInfo.owner, params.topicId))
@@ -56,7 +55,6 @@ class PushMessageMutation : GraphQLMutationResolver {
         } else {
             null
         }
-
 
         if (fcmTokenList.isNotEmpty()) {
             val pushResult = FCMMessageUtil.sendNotification(
@@ -79,7 +77,7 @@ class PushMessageMutation : GraphQLMutationResolver {
             message.deleted = false
             message.originalUrl = params.originalUrl
 
-            val savedMessage = messageRepository.save(message)
+            val savedMessage = messageRepositoryWrapper.save(message)
 
             logger.info("${tokenInfo.owner} 推送消息成功，id=${savedMessage.messageId}")
 

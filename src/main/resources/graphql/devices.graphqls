@@ -1,4 +1,12 @@
-type Device{
+type DeviceItemWithCursor{
+    id:ID!
+    deviceId:String!
+    type:String!
+    name:String!
+    cursor:String!
+}
+
+type DeviceItem{
     id:ID!
     deviceId:String!
     type:String!
@@ -18,12 +26,13 @@ input DeviceRenameParams{
     newName:String!
 }
 
-extend type Mutation {
-    registerDevice(param:DeviceRegisterParams!):Device!
-    renameDevice(param:DeviceRenameParams!):Device!
-    removeDevice(token:String!,id:ID!):Device!
+type DeviceQueryResult{
+    pageInfo:PageInfo!
+    devices:[DeviceItemWithCursor!]!
 }
 
-extend type Query {
-    listDevices(token:String!):[Device!]!
+extend type Mutation {
+    registerDevice(param:DeviceRegisterParams!):DeviceItem!
+    renameDevice(param:DeviceRenameParams!):DeviceItem!
+    removeDevice(token:String!,id:ID!):DeviceItem!
 }
