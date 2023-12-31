@@ -88,9 +88,29 @@ class UserResolver : GraphQLResolver<UserQLBean> {
         )
     }
 
-    fun getTokens(bean: UserQLBean): List<PushTokenQLBean> {
-        return pushTokenRepository.getPushTokenInfosByOwner(bean.uid).map {
-            return@map PushTokenQLBean(it.id, it.pushToken, it.name, it.generatedAt)
+    fun getTokens(bean: UserQLBean, @Min(1) count: Int, @GraphqlCursor after: String?): PushTokenQueryResult {
+        val totalCount = pushTokenRepository.countByOwner(bean.uid)
+        val offset =
+            if (after.isNullOrBlank()) 0 else base64Decoder.decode(after).toString(Charsets.UTF_8).substring(6)
+                .toInt() + 1
+        val tokenList = pushTokenRepository.getPushTokenInfosByOwner(
+            bean.uid,
+            OffsetBasedPageRequest(offset, count)
+        ).mapIndexed { index, item ->
+            val indexInDatabase = index + offset
+            val cursor = base64Encoder.encodeToString("cursor$indexInDatabase".toByteArray(Charsets.UTF_8))
+            PushTokenItemWithCursor(item.id, item.pushToken, item.name, item.generatedAt, cursor)
         }
+        return PushTokenQueryResult(
+            QueryPageInfo(
+                tokenList.firstOrNull()?.cursor,
+                tokenList.firstOrNull()?.cursor,
+                offset != 0,
+                offset + tokenList.size != totalCount,
+                totalCount,
+                tokenList.size
+            ),
+            tokenList
+        )
     }
 }

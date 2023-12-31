@@ -1,8 +1,21 @@
-type PushToken{
+type PushTokenItem{
     id:ID!
     token:String!
     name:String!
     generatedAt:Long!
+}
+
+type PushTokenItemWithCursor{
+    id:ID!
+    token:String!
+    name:String!
+    generatedAt:Long!
+    cursor:String!
+}
+
+type PushTokenQueryResult{
+    pageInfo:PageInfo!
+    items:[PushTokenItemWithCursor!]!
 }
 
 input PushTokenRenameParams{
@@ -11,13 +24,9 @@ input PushTokenRenameParams{
     newName:String!
 }
 
-extend type Query {
-    listToken(token:String!):[PushToken!]!
-}
-
 extend type Mutation{
-    deleteToken(id:ID!,token:String!):PushToken!
-    createToken(token:String!):PushToken!
-    renameToken(params:PushTokenRenameParams!):PushToken!
-    reGenerateToken(id:ID!,token:String!):PushToken!
+    deleteToken(id:ID!,token:String!):PushTokenItem!
+    createToken(token:String!):PushTokenItem!
+    renameToken(params:PushTokenRenameParams!):PushTokenItem!
+    reGenerateToken(id:ID!,token:String!):PushTokenItem!
 }

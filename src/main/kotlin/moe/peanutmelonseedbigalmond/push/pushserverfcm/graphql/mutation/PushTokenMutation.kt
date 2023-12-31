@@ -5,7 +5,7 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.PushTokenInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.LoginTokenWrapper
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.PushTokenRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.GraphqlException
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.PushTokenQLBean
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.PushTokenItem
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.PushTokenRenameParams
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -22,23 +22,23 @@ class PushTokenMutation : GraphQLMutationResolver {
 
     @Autowired
     private lateinit var pushTokenRepository: PushTokenRepository
-    fun deleteToken(id: Long, @NotBlank token: String): PushTokenQLBean {
+    fun deleteToken(id: Long, @NotBlank token: String): PushTokenItem {
         val uid = loginTokenRepository.getLoginTokenInfoByToken(token).belongsTo
         return pushTokenRepository.deleteByOwnerAndId(uid, id).firstOrNull()?.let {
-            return@let PushTokenQLBean(it.id, it.pushToken, it.name, it.generatedAt)
+            return@let PushTokenItem(it.id, it.pushToken, it.name, it.generatedAt)
         } ?: throw GraphqlException("token does not exists")
     }
 
-    fun reGenerateToken(id: Long, @NotBlank token: String): PushTokenQLBean {
+    fun reGenerateToken(id: Long, @NotBlank token: String): PushTokenItem {
         val uid = loginTokenRepository.getLoginTokenInfoByToken(token).belongsTo
         val pushToken = pushTokenRepository.findByIdAndOwner(id, uid) ?: throw GraphqlException("token does not exists")
         pushToken.pushToken = randomPushToken()
         return pushTokenRepository.save(pushToken).let {
-            return@let PushTokenQLBean(it.id, it.pushToken, it.name, it.generatedAt)
+            return@let PushTokenItem(it.id, it.pushToken, it.name, it.generatedAt)
         }
     }
 
-    fun createToken(@NotBlank token: String): PushTokenQLBean {
+    fun createToken(@NotBlank token: String): PushTokenItem {
         val uid = loginTokenRepository.getLoginTokenInfoByToken(token).belongsTo
         val pushToken = randomPushToken()
         val name = randomTokenName()
@@ -48,18 +48,18 @@ class PushTokenMutation : GraphQLMutationResolver {
         tokenInfo.pushToken = pushToken
         tokenInfo.generatedAt = System.currentTimeMillis()
         return pushTokenRepository.save(tokenInfo).let {
-            return@let PushTokenQLBean(it.id, it.pushToken, it.name, it.generatedAt)
+            return@let PushTokenItem(it.id, it.pushToken, it.name, it.generatedAt)
         }
     }
 
-    fun renameToken(@Valid params: PushTokenRenameParams): PushTokenQLBean {
+    fun renameToken(@Valid params: PushTokenRenameParams): PushTokenItem {
         val uid = loginTokenRepository.getLoginTokenInfoByToken(params.token).belongsTo
         val pushToken =
             pushTokenRepository.findByIdAndOwner(params.id, uid) ?: throw GraphqlException("push token does not exists")
         pushToken.name = params.newName
         val saved = pushTokenRepository.save(pushToken)
         return saved.let {
-            return@let PushTokenQLBean(it.id, it.pushToken, it.name, it.generatedAt)
+            return@let PushTokenItem(it.id, it.pushToken, it.name, it.generatedAt)
         }
     }
 

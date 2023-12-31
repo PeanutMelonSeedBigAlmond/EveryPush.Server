@@ -3,7 +3,7 @@ type User{
     devices(count:Int! =20,after:String):DeviceQueryResult!
     topics:[Topic!]!
     messages(count:Int! = 20,after:String):MessageQueryResult!
-    tokens:[PushToken!]!
+    tokens(count:Int! = 20,after:String):PushTokenQueryResult!
 }
 
 extend type Mutation {
