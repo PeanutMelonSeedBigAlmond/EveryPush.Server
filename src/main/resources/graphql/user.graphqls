@@ -1,7 +1,7 @@
 type User{
     name:String!
     devices(count:Int! =20,after:String):DeviceQueryResult!
-    topics:[Topic!]!
+    topics(count:Int! = 20,after:String):TopicQueryResult!
     messages(count:Int! = 20,after:String):MessageQueryResult!
     tokens(count:Int! = 20,after:String):PushTokenQueryResult!
 }

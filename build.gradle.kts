@@ -29,6 +29,7 @@ dependencies {
 
     implementation("com.graphql-java-kickstart:graphql-spring-boot-starter:7.0.1")
     implementation("com.graphql-java:graphql-java:14.0")
+    implementation("io.github.graphql-java:graphql-java-annotations:21.1")
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.hibernate.validator:hibernate-validator")

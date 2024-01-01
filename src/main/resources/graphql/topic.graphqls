@@ -1,11 +1,28 @@
-type Topic{
+interface BaseTopicItem{
     id:String
     name:String
-}
-
-extend type Topic{
     latestMessage:LatestMessage
     messages(count:Int = 20,after:String!):MessageQueryResult!
+}
+
+type TopicItem implements BaseTopicItem{
+    id:String
+    name:String
+    latestMessage:LatestMessage
+    messages(count:Int = 20,after:String!):MessageQueryResult!
+}
+
+type TopicItemWithCursor implements BaseTopicItem{
+    id:String
+    name:String
+    latestMessage:LatestMessage
+    messages(count:Int = 20,after:String!):MessageQueryResult!
+    cursor:String,
+}
+
+type TopicQueryResult{
+    pageInfo:PageInfo!
+    items:[BaseTopicItem!]!
 }
 
 type LatestMessage{
@@ -17,11 +34,11 @@ type LatestMessage{
 }
 
 extend type Query{
-    listTopic(token:String!):[Topic!]!
-    topicDetail(token:String!,topicId:String):Topic!
+    listTopic(token:String!,count:Int! = 20,after:String):TopicQueryResult!
+    topicDetail(token:String!,topicId:String):BaseTopicItem!
 }
 
 extend type Mutation {
-    createTopic(id:ID!,name:String!,token:String!):Topic!
-    deleteTopic(id:ID!,token:String!):[Topic!]!
+    createTopic(id:ID!,name:String!,token:String!):BaseTopicItem!
+    deleteTopic(id:ID!,token:String!):BaseTopicItem!
 }

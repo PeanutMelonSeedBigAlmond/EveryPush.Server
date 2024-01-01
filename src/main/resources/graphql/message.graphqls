@@ -4,7 +4,7 @@ type MessageItemWithCursor{
     text:String!
     title:String
     sendAt:Long!,
-    topic:Topic,
+    topic:BaseTopicItem,
     cursor:String!
 }
 
@@ -14,7 +14,7 @@ type SingleMessageItem{
     text:String!
     title:String
     sendAt:Long!,
-    topic:Topic,
+    topic:BaseTopicItem,
 }
 
 type MessageQueryResult{

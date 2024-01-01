@@ -1,6 +1,7 @@
 package moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository
 
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.bean.TopicInfo
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.repository.CrudRepository
 import org.springframework.transaction.annotation.Transactional
@@ -8,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 interface TopicRepository : CrudRepository<TopicInfo, TopicInfo.TopicInfoPK> {
 
 
-    fun findByPk_Owner(owner: Long): List<TopicInfo>
+    fun findByPk_Owner(owner: Long, pageable: Pageable): List<TopicInfo>
 
 
     fun existsByPk(pk: TopicInfo.TopicInfoPK): Boolean
@@ -19,4 +20,7 @@ interface TopicRepository : CrudRepository<TopicInfo, TopicInfo.TopicInfoPK> {
     @Transactional
     @Modifying
     fun deleteByPk(pk: TopicInfo.TopicInfoPK): List<TopicInfo>
+
+
+    fun countByPk_Owner(owner: Long): Int
 }

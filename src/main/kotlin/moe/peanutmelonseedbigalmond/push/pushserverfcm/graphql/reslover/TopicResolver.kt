@@ -13,20 +13,20 @@ import javax.validation.constraints.Min
 
 @Validated
 @Component
-class TopicResolver : GraphQLResolver<TopicQLBean> {
+abstract class BaseTopicItemResolver<T : BaseTopicItem> : GraphQLResolver<T> {
     @Autowired
     protected lateinit var messageRepositoryWrapper: MessageRepositoryWrapper
 
-    private val base64Encoder by lazy { Base64.getEncoder() }
-    private val base64Decoder by lazy { Base64.getDecoder() }
+    protected val base64Encoder by lazy { Base64.getEncoder() }
+    protected val base64Decoder by lazy { Base64.getDecoder() }
 
-    fun getLatestMessage(topic: TopicQLBean): LatestMessagesQLBean? {
+    fun getLatestMessage(topic: T): LatestMessagesQLBean? {
         return messageRepositoryWrapper.queryLatestMessage(topic.owner, topic.id)?.let {
             return@let LatestMessagesQLBean(it.messageId, it.type, it.text, it.title, it.pushTime)
         }
     }
 
-    fun getMessages(topic: TopicQLBean, @Min(1) count: Int, @GraphqlCursor after: String?): MessageQueryResult {
+    fun getMessages(topic: T, @Min(1) count: Int, @GraphqlCursor after: String?): MessageQueryResult {
         val totalCount = messageRepositoryWrapper.countByTopicIdAndOwnerAndDeleted(topic.id, topic.owner, false)
         val offset =
             if (after.isNullOrBlank()) 0 else base64Decoder.decode(after).toString(Charsets.UTF_8).substring(6)
@@ -53,3 +53,11 @@ class TopicResolver : GraphQLResolver<TopicQLBean> {
         )
     }
 }
+
+@Component
+@Validated
+class TopicItemResolver : BaseTopicItemResolver<TopicItem>()
+
+@Validated
+@Component
+class TopicItemWithCursorResolver : BaseTopicItemResolver<TopicItemWithCursor>()

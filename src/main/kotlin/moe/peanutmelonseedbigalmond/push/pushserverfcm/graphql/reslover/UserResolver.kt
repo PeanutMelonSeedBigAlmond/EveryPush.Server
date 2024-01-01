@@ -56,10 +56,30 @@ class UserResolver : GraphQLResolver<UserQLBean> {
     }
 
 
-    fun getTopics(bean: UserQLBean): List<TopicQLBean> {
-        return topicRepository.findByPk_Owner(bean.uid).map {
-            return@map TopicQLBean(it.pk.topicId, it.name, bean.uid)
+    fun getTopics(bean: UserQLBean, @Min(1) count: Int, after: String?): TopicQueryResult {
+        val totalCount = topicRepository.countByPk_Owner(bean.uid)
+        val offset =
+            if (after.isNullOrBlank()) 0 else base64Decoder.decode(after).toString(Charsets.UTF_8).substring(6)
+                .toInt() + 1
+        val topics = topicRepository.findByPk_Owner(
+            bean.uid,
+            OffsetBasedPageRequest(offset, count)
+        ).mapIndexed { index, item ->
+            val indexInDatabase = index + offset
+            val cursor = base64Encoder.encodeToString("cursor$indexInDatabase".toByteArray(Charsets.UTF_8))
+            TopicItemWithCursor(item.pk.topicId, item.name, item.pk.owner, cursor)
         }
+        return TopicQueryResult(
+            QueryPageInfo(
+                topics.firstOrNull()?.cursor,
+                topics.firstOrNull()?.cursor,
+                offset != 0,
+                offset + topics.size != totalCount,
+                totalCount,
+                topics.size
+            ),
+            topics
+        )
     }
 
     fun getMessages(bean: UserQLBean, @Min(1) count: Int, @GraphqlCursor after: String?): MessageQueryResult {

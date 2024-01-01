@@ -7,7 +7,8 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.LoginTokenW
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.TopicRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.GraphqlException
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.TopicQLBean
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.BaseTopicItem
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.TopicItem
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.util.fcm.FCMMessageUtil
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -39,7 +40,7 @@ class TopicMutation : GraphQLMutationResolver {
         id: String,
         @NotBlank @Size(max = 40) name: String,
         @NotBlank token: String
-    ): TopicQLBean {
+    ): BaseTopicItem {
         val uid = loginTokenWrapper.getLoginTokenInfoByToken(token).belongsTo
         val pk = TopicInfo.TopicInfoPK()
         pk.topicId = id
@@ -47,15 +48,14 @@ class TopicMutation : GraphQLMutationResolver {
 
         checkThrowGraphqlException(!topicRepository.existsByPk(pk)) { "Topic already exists" }
 
-        val fcmTokenList = deviceRepository.getDeviceInfosByOwner(uid)
-            .map { it.fcmToken }
+        val fcmTokenList = deviceRepository.getAllDevicesFcmTokenByOwner(uid)
 
         val topic = TopicInfo()
         topic.name = name
         topic.pk = pk
 
         try {
-            FCMMessageUtil.notifyTopicAdded(fcmTokenList, topic.pk.topicId, topic.name)
+            FCMMessageUtil.notifyTopicAdded(fcmTokenList, topic.pk.topicId!!, topic.name)
         } catch (e: Exception) {
             Logger.getLogger(this::class.simpleName)
                 .warning("通知客户端失败: createTopic")
@@ -63,33 +63,30 @@ class TopicMutation : GraphQLMutationResolver {
         }
 
         return topicRepository.save(topic).let {
-            return@let TopicQLBean(it.pk.topicId, it.name, uid)
+            return@let TopicItem(it.pk.topicId, it.name, uid)
         }
     }
 
     @Transactional
-    fun deleteTopic(@NotBlank id: String, @NotBlank token: String): List<TopicQLBean> {
+    fun deleteTopic(@NotBlank id: String, @NotBlank token: String): BaseTopicItem {
         val uid = loginTokenWrapper.getLoginTokenInfoByToken(token).belongsTo
-        val fcmTokenList = deviceRepository.getDeviceInfosByOwner(uid)
-            .map { it.fcmToken }
+        val fcmTokenList = deviceRepository.getAllDevicesFcmTokenByOwner(uid)
         val res = topicRepository.deleteByPk(TopicInfo.TopicInfoPK(uid, id)).also {
             checkThrowGraphqlException(it.isNotEmpty()) { "Topic does not exists" }
         }.map {
-            return@map TopicQLBean(it.pk.topicId, it.name, uid)
+            return@map TopicItem(it.pk.topicId, it.name, uid)
         }.also {
             for (item in it) {
                 messageRepository.moveTopicAllMessageToDefaultTopic(item.id!!, item.owner)
             }
-        }
+        }.first()
 
-        res.forEach {
-            try {
-                FCMMessageUtil.notifyTopicDeleted(fcmTokenList, it.id!!)
-            } catch (e: Exception) {
-                Logger.getLogger(this::class.simpleName)
-                    .warning("通知客户端失败: deleteTopic")
-                e.printStackTrace()
-            }
+        try {
+            FCMMessageUtil.notifyTopicDeleted(fcmTokenList, res.id!!)
+        } catch (e: Exception) {
+            Logger.getLogger(this::class.simpleName)
+                .warning("通知客户端失败: deleteTopic")
+            e.printStackTrace()
         }
 
         return res

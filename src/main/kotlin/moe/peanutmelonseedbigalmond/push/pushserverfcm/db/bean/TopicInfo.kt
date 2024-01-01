@@ -28,10 +28,10 @@ class TopicInfo {
         @Column(nullable = false)
         var owner: Long = 0L
 
-        @Column(nullable = false)
-        lateinit var topicId: String
+        @Column(nullable = true)
+        var topicId: String? = null
 
-        constructor(owner: Long, topicId: String) : this() {
+        constructor(owner: Long, topicId: String?) : this() {
             this.owner = owner
             this.topicId = topicId
         }

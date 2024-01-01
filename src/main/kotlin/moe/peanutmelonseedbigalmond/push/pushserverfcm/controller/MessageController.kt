@@ -53,8 +53,7 @@ class MessageController {
         val tokenInfo = pushTokenRepository.getPushTokenInfoByPushToken(pushToken) ?: return ResponseEntity(
             RestApiResponseWrapper(message = "Push token does not exists"), HttpStatus.BAD_REQUEST
         )
-        val deviceList = deviceRepository.getDeviceInfosByOwner(tokenInfo.owner)
-        val fcmTokenList = deviceList.map { it.fcmToken }
+        val fcmTokenList = deviceRepository.getAllDevicesFcmTokenByOwner(tokenInfo.owner)
 
         val topic = if (topicId != null) {
             val t = topicRepository.findByPk(TopicInfo.TopicInfoPK(tokenInfo.owner, topicId))
