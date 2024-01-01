@@ -9,3 +9,7 @@ type User{
 extend type Mutation {
     login(firebaseToken:String!):Token!
 }
+
+extend type Query {
+    user(token:String!):User!
+}
