@@ -6,7 +6,7 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.typereslover.Mess
 @GraphQLTypeResolver(MessageItemTypeResolver::class)
 data class MessageQueryResult(
     val pageInfo: QueryPageInfo,
-    val messages: List<BaseMessageItem>,
+    val items: List<BaseMessageItem>,
 )
 
 abstract class BaseMessageItem {

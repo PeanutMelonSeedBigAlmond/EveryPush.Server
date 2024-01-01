@@ -28,7 +28,7 @@ input DeviceRenameParams{
 
 type DeviceQueryResult{
     pageInfo:PageInfo!
-    devices:[DeviceItemWithCursor!]!
+    items:[DeviceItemWithCursor!]!
 }
 
 extend type Mutation {

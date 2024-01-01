@@ -28,7 +28,7 @@ type SingleMessageItem implements BaseMessageItem{
 
 type MessageQueryResult{
     pageInfo:PageInfo!
-    messages:[BaseMessageItem!]!
+    items:[BaseMessageItem!]!
 }
 
 extend type Mutation {

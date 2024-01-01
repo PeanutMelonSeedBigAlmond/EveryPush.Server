@@ -17,5 +17,5 @@ data class DeviceItemWithCursor(
 
 data class DeviceQueryResult(
     val pageInfo: QueryPageInfo,
-    val devices: List<DeviceItemWithCursor>,
+    val items: List<DeviceItemWithCursor>,
 )
