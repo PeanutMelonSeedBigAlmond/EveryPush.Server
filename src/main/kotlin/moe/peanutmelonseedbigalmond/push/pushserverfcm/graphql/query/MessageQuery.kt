@@ -4,6 +4,7 @@ import graphql.kickstart.tools.GraphQLQueryResolver
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.LoginTokenWrapper
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.db.repository.MessageRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.GraphqlException
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.BaseMessageItem
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean.MessageItem
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -19,7 +20,7 @@ class MessageQuery : GraphQLQueryResolver {
     @Autowired
     private lateinit var messageRepository: MessageRepository
 
-    fun queryMessage(@NotBlank token: String, id: Long): MessageItem {
+    fun queryMessage(@NotBlank token: String, id: Long): BaseMessageItem {
         val uid = loginTokenQuery.getLoginTokenInfoByToken(token).belongsTo
         val message = messageRepository.findByMessageIdAndOwnerAndNotDeleted(uid, id)
             ?: throw GraphqlException("message does not exists")

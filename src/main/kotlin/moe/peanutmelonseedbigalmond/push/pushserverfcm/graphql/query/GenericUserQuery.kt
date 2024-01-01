@@ -20,7 +20,7 @@ class GenericUserQuery : GraphQLQueryResolver {
 
     fun getUser(@NotBlank token: String): UserQLBean {
         val tokenInfo = loginTokenRepository.getLoginTokenInfoByToken(token)
-        val userInfo = userRepository.getUserInfoByUid(tokenInfo.id)!!
+        val userInfo = userRepository.getUserInfoByUid(tokenInfo.belongsTo)!!
 
         return UserQLBean(userInfo.username, userInfo.uid)
     }

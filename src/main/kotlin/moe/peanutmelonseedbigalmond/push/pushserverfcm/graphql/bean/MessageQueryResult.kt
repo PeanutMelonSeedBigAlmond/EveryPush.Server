@@ -1,25 +1,38 @@
 package moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.bean
 
+import graphql.annotations.annotationTypes.GraphQLTypeResolver
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.graphql.typereslover.MessageItemTypeResolver
+
+@GraphQLTypeResolver(MessageItemTypeResolver::class)
 data class MessageQueryResult(
     val pageInfo: QueryPageInfo,
-    val messages: List<MessageItemWithCursor>,
+    val messages: List<BaseMessageItem>,
 )
+
+abstract class BaseMessageItem {
+    abstract val owner: Long
+    abstract val id: Long
+    abstract val type: String
+    abstract val text: String
+    abstract val title: String?
+    abstract val sendAt: Long
+}
 
 data class MessageItem(
-    val owner: Long,
-    val id: Long,
-    val type: String,
-    val text: String,
-    val title: String?,
-    val sendAt: Long,
-)
+    override val owner: Long,
+    override val id: Long,
+    override val type: String,
+    override val text: String,
+    override val title: String?,
+    override val sendAt: Long,
+) : BaseMessageItem()
 
 data class MessageItemWithCursor(
-    val owner: Long,
-    val id: Long,
-    val type: String,
-    val text: String,
-    val title: String?,
-    val sendAt: Long,
-    val cursor: String, // base64(cursor+偏移量, utf8)
-)
+    override val owner: Long,
+    override val id: Long,
+    override val type: String,
+    override val text: String,
+    override val title: String?,
+    override val sendAt: Long,
+    val cursor: String,
+) : BaseMessageItem()

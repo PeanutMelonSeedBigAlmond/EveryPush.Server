@@ -1,4 +1,13 @@
-type MessageItemWithCursor{
+interface BaseMessageItem{
+    id:ID!,
+    type:String!
+    text:String!
+    title:String
+    sendAt:Long!,
+    topic:BaseTopicItem,
+}
+
+type MessageItemWithCursor implements BaseMessageItem{
     id:ID!,
     type:String!
     text:String!
@@ -8,7 +17,7 @@ type MessageItemWithCursor{
     cursor:String!
 }
 
-type SingleMessageItem{
+type SingleMessageItem implements BaseMessageItem{
     id:ID!,
     type:String!
     text:String!
@@ -19,13 +28,13 @@ type SingleMessageItem{
 
 type MessageQueryResult{
     pageInfo:PageInfo!
-    messages:[MessageItemWithCursor!]!
+    messages:[BaseMessageItem!]!
 }
 
 extend type Mutation {
-    deleteMessage(token:String!,id:ID!):SingleMessageItem!
+    deleteMessage(token:String!,id:ID!):BaseMessageItem!
 }
 
 extend type Query {
-    queryMessage(token:String!,id:ID!):SingleMessageItem!
+    queryMessage(token:String!,id:ID!):BaseMessageItem!
 }
