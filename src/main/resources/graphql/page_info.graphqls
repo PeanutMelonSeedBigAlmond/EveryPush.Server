@@ -1,8 +1,0 @@
-type PageInfo{
-    firstCursor:String
-    lastCursor:String
-    hasPreviousPage:Boolean!
-    hasNextPage:Boolean!
-    total:Int!
-    count:Int!
-}

@@ -1,8 +1,0 @@
-scalar Long
-
-type Token{
-    uid:ID!
-    token:String!
-    expiredAt:Long!
-    user:User
-}
