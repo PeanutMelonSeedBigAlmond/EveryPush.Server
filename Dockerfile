@@ -4,7 +4,7 @@ COPY . /src
 RUN chmod +x ./gradlew && \
     ./gradlew bootJar
 
-FROM openjdk as production
+FROM openjdk:21 as production
 ENV TZ=Asia/Shanghai
 WORKDIR /app
 COPY --from=build /src/build/libs/*.jar /app/app.jar
