@@ -95,8 +95,8 @@ class MessageGroupController {
 
     @PostMapping("sync")
     fun syncMessageGroup(
-        @RequestParam clientMessageGroupsId: List<String>,
-        @RequestParam clientMessageGroupsName: List<String>,
+        @RequestParam(defaultValue = "", required = false) clientMessageGroupsId: List<String>,
+        @RequestParam(defaultValue = "", required = false) clientMessageGroupsName: List<String>,
     ): SyncMessageGroupResponse {
         val user = ThreadLocalUtil.getCurrentUser()
         val clientMessageGroups = clientMessageGroupsId.zip(clientMessageGroupsName).toMap()
