@@ -59,6 +59,7 @@ class MessageGroupController {
         val messageGroup = messageGroupRepository.findMessageGroupInfoByGroupIdAndUid(id, user.uid)
             ?: throw MessageGroupNotExistsException()
         messageGroupRepository.delete(messageGroup)
+        messageRepository.deleteByUidAndMessageGroupId(user.uid, id)
         logger.info("删除消息组成功：user=${user.username}, groupName=${messageGroup.name}")
     }
 
