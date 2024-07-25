@@ -14,6 +14,7 @@ value class ResponseErrorCode private constructor(
         val KeyNotExists = ResponseErrorCode("A0607")
         val MessageGroupExists = ResponseErrorCode("A0608")
         val MessageGroupNotExists = ResponseErrorCode("A0609")
+        val MessageGroupIdInvalid = ResponseErrorCode("A0610")
         val MessageNotExists = ResponseErrorCode("A0610")
         val MalformedParameters = ResponseErrorCode("A0421")
         val MessageServiceError = ResponseErrorCode("C0120")

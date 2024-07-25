@@ -11,6 +11,7 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.data.enumration.MessageTy
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.MessageInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.*
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.exception.*
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.service.MessageGroupService
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.service.PushMessageService
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.utils.MarkdownUtil
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.utils.ThreadLocalUtil
@@ -46,6 +47,9 @@ class MessageController {
 
     @Autowired
     private lateinit var userInfoRepository: UserInfoRepository
+
+    @Autowired
+    private lateinit var messageGroupService: MessageGroupService
 
     /**
      * 列出指定分组的消息
@@ -170,10 +174,9 @@ class MessageController {
         }
 
         val messageGroup = if (group != null) {
-            withContext(Dispatchers.IO) {
-                messageGroupRepository.findMessageGroupInfoByGroupIdAndUid(group, uid)
-            } ?: throw MessageGroupNotExistsException()
+            messageGroupService.createMessageGroupOrGet(user, group)
         } else {
+            // 默认分组
             null
         }
 

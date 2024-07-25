@@ -5,10 +5,8 @@ import jakarta.validation.constraints.NotNull
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.MessageGroupDetailResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.MessageGroupResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.SyncMessageGroupResponse
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.MessageGroupInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.MessageGroupRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.MessageRepository
-import moe.peanutmelonseedbigalmond.push.pushserverfcm.exception.MessageGroupExistsException
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.exception.MessageGroupNotExistsException
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.utils.ThreadLocalUtil
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,16 +30,16 @@ class MessageGroupController {
     @Autowired
     private lateinit var messageRepository: MessageRepository
 
-    @PostMapping("create")
-    fun createMessageGroup(@NotBlank name: String, @NotBlank id: String) {
-        val user = ThreadLocalUtil.getCurrentUser()
-        if (messageGroupRepository.existsByGroupIdAndUid(id.trim(), user.uid)) throw MessageGroupExistsException()
-
-        val messageGroup = MessageGroupInfo(name, id.trim(), user.uid, System.currentTimeMillis())
-        messageGroupRepository.save(messageGroup)
-
-        logger.info("创建消息组成功：user=${user.username}, groupName=${messageGroup.name}")
-    }
+//    @PostMapping("create")
+//    fun createMessageGroup(@NotBlank name: String, @NotBlank id: String) {
+//        val user = ThreadLocalUtil.getCurrentUser()
+//        if (messageGroupRepository.existsByGroupIdAndUid(id.trim(), user.uid)) throw MessageGroupExistsException()
+//
+//        val messageGroup = MessageGroupInfo(name, id.trim(), user.uid, System.currentTimeMillis())
+//        messageGroupRepository.save(messageGroup)
+//
+//        logger.info("创建消息组成功：user=${user.username}, groupName=${messageGroup.name}")
+//    }
 
     @PostMapping("rename")
     fun renameMessageGroup(@NotBlank id: String, @NotBlank name: String) {
