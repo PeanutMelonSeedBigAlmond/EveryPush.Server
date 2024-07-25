@@ -33,20 +33,22 @@ class DeviceController {
         @NotBlank @RequestParam(defaultValue = "Android") platform: String,
     ) {
         val user = ThreadLocalUtil.getCurrentUser()
+        val userToken = ThreadLocalUtil.getCurrentUserToken()
         val deviceInfo = deviceInfoRepository.findDeviceInfoByDeviceToken(deviceToken)
         if (deviceInfo == null) {
             val info = DeviceInfo(
                 user.uid,
                 name,
                 platform,
-                deviceToken
+                deviceToken,
+                userToken.id
             )
             deviceInfoRepository.save(info)
             logger.info("注册设备成功：username=${user.username}, deviceName=${info.name}, platform=${info.platform}")
-
         } else {
             if (deviceInfo.uid != user.uid) {
                 deviceInfo.uid = user.uid
+                deviceInfo.userTokenId = userToken.id
                 deviceInfoRepository.save(deviceInfo)
                 logger.warning("修改设备归属成功：username=${user.username}, deviceName=${deviceInfo.name}, platform=${deviceInfo.platform}")
             }

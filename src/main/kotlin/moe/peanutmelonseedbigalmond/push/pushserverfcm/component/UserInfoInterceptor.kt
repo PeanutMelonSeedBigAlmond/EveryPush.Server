@@ -34,6 +34,7 @@ class UserInfoInterceptor : HandlerInterceptor {
         val uid = userToken.uid
         val userInfo = userInfoRepository.findById(uid).getOrNull() ?: throw UserNotExistsException()
         ThreadLocalUtil.addCurrentUser(userInfo)
+        ThreadLocalUtil.addCurrentUserToken(userToken)
 
         userToken.updatedAt = System.currentTimeMillis()
         userInfoRepository.save(userInfo)
@@ -48,5 +49,6 @@ class UserInfoInterceptor : HandlerInterceptor {
         modelAndView: ModelAndView?
     ) {
         ThreadLocalUtil.removeCurrentUser()
+        ThreadLocalUtil.removeCurrentUserToken()
     }
 }

@@ -1,6 +1,7 @@
 package moe.peanutmelonseedbigalmond.push.pushserverfcm.utils
 
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.UserInfo
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.UserToken
 
 
 object ThreadLocalUtil {
@@ -15,4 +16,17 @@ object ThreadLocalUtil {
 
     @JvmStatic
     fun removeCurrentUser() = userThreadLocal.remove()
+
+
+    @JvmStatic
+    private val userTokenThreadLocal = ThreadLocal<UserToken>()
+
+    @JvmStatic
+    fun addCurrentUserToken(userToken: UserToken) = userTokenThreadLocal.set(userToken)
+
+    @JvmStatic
+    fun getCurrentUserToken() = userTokenThreadLocal.get()
+
+    @JvmStatic
+    fun removeCurrentUserToken() = userTokenThreadLocal.remove()
 }

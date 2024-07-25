@@ -14,13 +14,15 @@ class DeviceInfo {
     lateinit var name: String
     lateinit var platform: String
     lateinit var deviceToken: String
+    var userTokenId: Long = 0L
 
     constructor()
 
-    constructor(uid: String, name: String, platform: String, deviceToken: String) {
+    constructor(uid: String, name: String, platform: String, deviceToken: String, userTokenId: Long) {
         this.uid = uid
         this.name = name
         this.platform = platform
         this.deviceToken = deviceToken
+        this.userTokenId = userTokenId
     }
 }

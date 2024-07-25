@@ -8,6 +8,7 @@ import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.UserL
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.controller.response.UserLoginResponse
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.UserInfo
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.data.UserToken
+import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.DeviceInfoRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.UserInfoRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.database.repository.UserTokenRepository
 import moe.peanutmelonseedbigalmond.push.pushserverfcm.exception.InvalidCredentialException
@@ -33,6 +34,9 @@ class UserController {
 
     @Autowired
     private lateinit var loginTokenRepository: UserTokenRepository
+
+    @Autowired
+    private lateinit var deviceInfoRepository: DeviceInfoRepository
 
     @PostMapping("login")
     fun login(
@@ -81,7 +85,9 @@ class UserController {
     @PostMapping("logout")
     fun userLogout(@NotBlank token: String) {
         val user = ThreadLocalUtil.getCurrentUser()
+        val userToken = ThreadLocalUtil.getCurrentUserToken()
         val count = loginTokenRepository.deleteUserTokenByUidAndToken(user.uid, token)
+        deviceInfoRepository.deleteByUserTokenId(userToken.id)
         if (count != 0L) {
             logger.info("用户注销: ${user.username}")
         }
@@ -90,7 +96,9 @@ class UserController {
     @PostMapping("logoutOthers")
     fun logoutOthers(@NotBlank token: String) {
         val user = ThreadLocalUtil.getCurrentUser()
+        val userToken = ThreadLocalUtil.getCurrentUserToken()
         val count = loginTokenRepository.deleteUserTokenByUidAndTokenIsNot(user.uid, token)
+        deviceInfoRepository.deleteByUserTokenIdNot(userToken.id)
         if (count != 0L) {
             logger.info("用户注销: ${user.username}")
         }
